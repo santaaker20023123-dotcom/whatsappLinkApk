@@ -25,6 +25,9 @@ client.on('ready', () => {
 
 client.initialize();
 
+// The to-do UI is available at /todo; keep the WhatsApp QR screen at /.
+app.use('/todo', express.static(require('path').join(__dirname, 'public')));
+
 app.get('/', async (req, res) => {
   if (!qrCodeData) {
     return res.send('<h2>Loading QR... please refresh after 5 seconds</h2>');
