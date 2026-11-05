@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Random Joke Generator</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      background: #f0f2f5;
+      color: #17212b;
+      font: 16px/1.5 system-ui, sans-serif;
+    }
+
+    .card {
+      width: min(100%, 480px);
+      padding: 32px;
+      border: 1px solid #e3e8eb;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 12px 36px rgb(0 0 0 / 8%);
+      text-align: center;
+    }
+
+    .emoji { font-size: 42px; }
+
+    h1 {
+      margin: 8px 0;
+      font-size: clamp(24px, 6vw, 32px);
+    }
+
+    #joke {
+      min-height: 72px;
+      margin: 24px 0;
+      color: #3b4a54;
+      font-size: 18px;
+    }
+
+    button {
+      min-height: 48px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 999px;
+      background: #008069;
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: #00705c; }
+    button:focus-visible { outline: 3px solid #80cbb8; outline-offset: 3px; }
+    button:disabled { cursor: wait; opacity: .7; }
+
+    .credit {
+      margin: 20px 0 0;
+      color: #667781;
+      font-size: 13px;
+    }
+
+    .credit a { color: #00705c; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="emoji" aria-hidden="true">😂</div>
+    <h1>Random Joke Generator</h1>
+    <p id="joke" aria-live="polite">Ready for a laugh? Get a joke!</p>
+    <button id="jokeButton" type="button">Tell me a joke</button>
+    <p class="credit">
+      Jokes provided by
+      <a href="https://v2.jokeapi.dev/" target="_blank" rel="noopener noreferrer">JokeAPI</a>
+    </p>
+  </main>
+
+  <script>
+    const jokeElement = document.getElementById("joke");
+    const jokeButton = document.getElementById("jokeButton");
+
+    async function getJoke() {
+      jokeButton.disabled = true;
+      jokeButton.textContent = "Loading…";
+      jokeElement.textContent = "Finding a joke for you…";
+
+      try {
+        const response = await fetch("https://v2.jokeapi.dev/joke/Any?safe-mode");
+
+        if (!response.ok) {
+          throw new Error("The joke service is unavailable.");
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error("The joke service returned an error.");
+        }
+
+        // JokeAPI provides either a single-line joke or a setup and delivery.
+        jokeElement.textContent = data.type === "twopart"
+          ? `${data.setup} ${data.delivery}`
+          : data.joke;
+      } catch (error) {
+        jokeElement.textContent =
+          "Sorry, I couldn't fetch a joke right now. Check your internet connection and try again.";
+      } finally {
+        jokeButton.disabled = false;
+        jokeButton.textContent = "Get another joke";
+      }
+    }
+
+    jokeButton.addEventListener("click", getJoke);
+  </script>
+</body>
+</html>
